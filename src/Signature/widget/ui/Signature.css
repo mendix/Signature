@@ -1,0 +1,42 @@
+
+/* Clear button */
+.wgt-Signature div {
+    clear: both;
+}
+
+.wgt-Signature canvas,
+.wgt-Signature img {
+    position: relative;
+    left:     0px;
+    right:    0px;
+    max-width: none;
+}
+
+.signature_unset canvas {
+    display: block;
+}
+
+.signature_unset img {
+    display: none;
+}
+
+.signature_unset button {
+    display: none;
+}
+
+.signature_set canvas {
+    display: none;
+}
+
+.signature_set img {
+    display: block;
+    opacity: 0.5;
+}
+
+.signature_set button {
+    display: block;
+}
+
+.signature_disabled button {
+    display: none;
+}

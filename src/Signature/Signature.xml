@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<widget id="Signature.widget.Signature" 
+        needsEntityContext="true" 
+        mobile="true"
+        xmlns="http://www.mendix.com/widget/1.0/">
+    <name>Signature</name>
+    <description>A HTML5/Canvas based Signature widget</description>
+
+    <icon>iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAehJREFUeNpi/J82k4Hh/38Ghn//UPAD5e0M99V2MUxeHcAAAlM2bLD5w8BQ9I6B4eaT//8rGaCAhQENPFDZwXAfqBkZ/P//Xy3GwcF4r4lJIOOlS6/u79y5Fyi8B8WAy7xbGS7zbGWQVGbE0Pzx40fPPXv2TFi3fv21f93d739DNYMA46VCX4bL3JvhGiS1GJE0M9h//cpQqqoT6P30ycOPvvHXZhT/+FGhAvIyFDAha0a1GaLZ3a/K++/vf69PHT17WVr0d8U1RlQXMhHSfPvm1deb1m24+es3g62sxD8MtSzEav4H1XsdqGAdsgFff0CdAnQZCzOD3IOrPHaByZHee3ftfHnh7JnbMM0Hz4AwFhfADGBmYmD8+48xpaBpf21xhunC778YbgmJMLYdufAfrBkn8DCD4LZUxp5nV5f9zwliXO5nzehpos7IQAqQAnk/w59xlZQIoxeQrQrECkAsDcRiQCwIxDxAzA4NN7DpvHL6QJ02cWA2KAkAsTgQiwKxMBALADEfEHMDMScQs0E1g2KOEaTZuHw3A7NaZA8Dn7zBL3Z+iS9A9ldGRsZvQMnvQPYPIPsnkP0byP4DZP8Fsv8B2f+BbAYFr1JISgSaEgWkl0G9QjKbiYFCAHKBCzSgyAGvAAIMAHD/1dmmASuxAAAAAElFTkSuQmCC</icon>
+
+    <properties>
+
+        <property key="dataUrl" type="attribute" required="true" isPath="optional" pathType="reference">
+            <caption>Data URL</caption>
+            <category>Data source</category>
+            <description>The Data URL attribute. Make sure this is an 'Unlimited String'! The signature is stored here as a Base64 encoded PNG image.</description>
+            <attributeTypes>
+                <attributeType name="String"/>
+            </attributeTypes>
+        </property>
+
+        <property key="resetcaption" type="translatableString">
+            <caption>Reset caption</caption>
+            <category>Customization</category>
+            <description>Caption to show on the reset button.</description>
+            <translations>
+                <translation lang="en_US">Reset signature</translation>
+            </translations>
+        </property>
+
+        <property key="pencolor" type="string" defaultValue="#000">
+            <caption>Pen color</caption>
+            <category>Customization</category>
+            <description>Pen color</description>
+        </property>
+
+        <property key="pensize" type="integer" defaultValue="2">
+            <caption>Pen size</caption>
+            <category>Customization</category>
+            <description>Pen size</description>
+        </property>
+
+        <property key="timeout" type="integer" defaultValue="1000">
+            <caption>Signature timeout</caption>
+            <category>Customization</category>
+            <description>Time (in ms) to wait before considering the signature finished after the pen has stopped touching the pad.</description>
+        </property>
+
+        <property key="height" type="integer" defaultValue="500">
+            <caption>Canvas height</caption>
+            <category>Customization</category>
+            <description>Canvas height</description>
+        </property>
+
+        <property key="width" type="integer" defaultValue="500">
+            <caption>Canvas width</caption>
+            <category>Customization</category>
+            <description>Canvas width</description>
+        </property>
+
+        <property key="showgrid" type="boolean" defaultValue="true">
+            <caption>Show background grid</caption>
+            <category>Customization</category>
+            <description>Show background grid</description>
+        </property>
+
+        <property key="gridx" type="integer" defaultValue="50">
+            <caption>Grid X</caption>
+            <category>Customization</category>
+            <description>Grid column size</description>
+        </property>
+
+        <property key="gridy" type="integer" defaultValue="50">
+            <caption>Grid Y</caption>
+            <category>Customization</category>
+            <description>Grid row size</description>
+        </property>
+
+        <property key="gridcolor" type="string" defaultValue="#777">
+            <caption>Grid color</caption>
+            <category>Customization</category>
+            <description>Grid color</description>
+        </property>
+        <property key="gridborder" type="integer" defaultValue="2">
+            <caption>Grid border width</caption>
+            <category>Customization</category>
+            <description>Border width(px)</description>
+        </property>
+
+    </properties>
+</widget>
+
+
