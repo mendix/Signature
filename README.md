@@ -23,5 +23,6 @@ Add the widget to a dataview. Connect the data URL property to an unlimited Stri
 * *Grid X* - The distance in pixels between gridlines in the horizontal direction.
 * *Grid Y* - The distance in pixels between gridlines in the vertical direction.
 * *Grid color* - HTML color code of the grid
+* *Grid border width* - Width of canvas border in pixels
 * *Reset caption* - Caption that is shown on the button with which you can remove an existing signature.
 * *Data URL* - Unlimited string attribute that is used to save the signature.
