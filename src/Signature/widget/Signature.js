@@ -18,11 +18,9 @@
 */
 (function() {
     require([
-
         'mxui/widget/_WidgetBase', 'dijit/_Widget', 'dijit/_TemplatedMixin',
-        'mxui/dom', 'dojo/dom', 'dojo/dom-construct', 'dojo/ready', 'dojo/query', 'dojo/dom-prop', 'dojo/dom-geometry', 'dojo/dom-class', 'dojo/dom-style', 'dojo/on', 'dojo/_base/lang', 'dojo/_base/declare', 'dojo/text'
-
-    ], function(_WidgetBase, _Widget, _Templated, domMx,dom, domConstruct, domReady, domQuery, domProp, domGeom, domClass, domStyle, on, lang, declare, text) {
+        'mxui/dom', 'dojo/dom', 'dojo/dom-construct', 'dojo/ready', 'dojo/query', 'dojo/dom-prop', 'dojo/dom-geometry', 'dojo/dom-class', 'dojo/dom-style', 'dojo/on', 'dojo/_base/lang', 'dojo/_base/declare'
+    ], function(_WidgetBase, _Widget, _Templated, domMx,dom, domConstruct, domReady, domQuery, domProp, domGeom, domClass, domStyle, on, lang, declare) {
 
         return declare('Signature.widget.Signature', [ _WidgetBase, _Widget, _Templated ], {
             _contextGuid: null,
