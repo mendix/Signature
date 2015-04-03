@@ -25,7 +25,6 @@
     ], function(_WidgetBase, _Widget, _Templated, domMx,dom, domConstruct, domReady, domQuery, domProp, domGeom, domClass, domStyle, on, lang, declare, text) {
 
         return declare('Signature.widget.Signature', [ _WidgetBase, _Widget, _Templated ], {
-            _wgtNode: null,
             _contextGuid: null,
             _contextObj: null,
             _handle: null,
@@ -86,8 +85,6 @@
             _setupWidget: function() {
                 var t = this._smoothingpct,
                     u = 1 - t;
-
-                this._wgtNode = this.domNode;
 
                 this._bezier1 = t * t * t;
                 this._bezier2 = 3 * t * t * u;
