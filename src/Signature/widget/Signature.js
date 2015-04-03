@@ -51,9 +51,6 @@
                 console.log('Signature - postCreate');
 
                 this._setupWidget();
-
-                // this._createChildNodes();
-
                 this._setupEvents();
             },
 
