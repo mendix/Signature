@@ -29,9 +29,6 @@
 
     ], function (_WidgetBase, _Widget, _Templated, domMx,dom, domConstruct, domReady, domQuery, domProp, domGeom, domClass, domStyle, on, lang, declare, text) {
 
-        // Provide widget.
-        dojo.provide('Signature.widget.Signature');
-
         // Declare widget.
         return declare('Signature.widget.Signature', [ _WidgetBase, _Widget, _Templated], {
 
