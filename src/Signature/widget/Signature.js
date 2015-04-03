@@ -51,6 +51,7 @@
                 console.log('Signature - postCreate');
 
                 this._setupWidget();
+                this._createUI();
                 this._setupEvents();
             },
 
@@ -96,8 +97,36 @@
                 this._bezierBuf = [];
 
                 this._touchSupport = window.hasOwnProperty('ontouchstart');
+            },
 
-                this._createUI();
+            _createUI: function() {
+                var $ = domConstruct.create,
+                    sizeProperties = {
+                        'width': this.width + 'px',
+                        'height': this.height + 'px'
+                    },
+                    allProperties = lang.mixin(sizeProperties, {
+                        'style': 'border: ' + this.gridborder + 'px solid ' + this.gridcolor
+                    });
+
+                this._canvas = $('canvas', allProperties);
+                this._image  = $('img', allProperties);
+
+                this._reset = $('button', {
+                    'class': 'btn',
+                    'style': {
+                        'width': (this.width + 4) + 'px'
+                    },
+                    'innerHTML':  this.resetcaption
+                });
+
+                this.domNode.appendChild(this._canvas);
+                this.domNode.appendChild(this._image);
+                this.domNode.appendChild(this._reset);
+
+                domStyle.set(this.domNode, sizeProperties);
+
+                this._context = this._canvas.getContext('2d');
             },
 
             _updateObject: function(obj, callback) {
@@ -114,36 +143,6 @@
                 this.set('disabled', obj ? false : true);
 
                 mendix.lang.nullExec(callback);
-            },
-
-            _createUI: function() {
-                var $ = domConstruct.create,
-                    sizeProperties = {
-                        'width': this.width + 'px',
-                        'height': this.height + 'px'
-                    },
-                    allProperties = lang.mixin(sizeProperties, {
-                        'style': 'border: ' + this.gridborder + 'px solid ' + this.gridcolor
-                    });
-
-                this._canvas = $('canvas', allProperties);
-                this._image  = $('img', allProperties);
-                
-                this._reset = $('button', {
-                    'class': 'btn',
-                    'style': {
-                        'width': (this.width + 4) + 'px'
-                    },
-                    'innerHTML':  this.resetcaption
-                });
-
-                this.domNode.appendChild(this._canvas);
-                this.domNode.appendChild(this._image);
-                this.domNode.appendChild(this._reset);
-                
-                domStyle.set(this.domNode, sizeProperties);
-
-                this._context = this._canvas.getContext('2d');
             },
 
             _showImage: function() {
