@@ -175,7 +175,8 @@
                     context.moveTo(x, 0);
                     context.lineTo(x, this._canvas.height);
                 }
-                for (y; y < this.height; y += this.gridy) {
+
+                for (y; y < height; y += this.gridy) {
                     context.moveTo(0, y);
                     context.lineTo(this._canvas.width, y);
                 }
