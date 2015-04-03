@@ -84,8 +84,7 @@
 
             _setupWidget: function() {
                 var t = this._smoothingpct,
-                    u = 1 - t,
-                    touchStart = null;
+                    u = 1 - t;
 
                 this._wgtNode = this.domNode;
 
@@ -96,9 +95,7 @@
 
                 this._bezierBuf = [];
 
-                touchStart = window.hasOwnProperty('ontouchstart');
-
-                this._touchSupport = touchStart;
+                this._touchSupport = window.hasOwnProperty('ontouchstart');
 
                 this._createUI();
             },
@@ -108,12 +105,8 @@
 
                 this._resetCanvas();
 
-                if (typeof this._attribute !== 'undefined' && this._attribute !== null){
-                    if (obj && obj.get(this._attribute)) {
-                        this._showImage();
-                    } else {
-                        this._hideImage();
-                    }
+                if (this._attribute && obj && obj.get(this._attribute)) {
+                    this._showImage();
                 } else {
                     this._hideImage();
                 }
@@ -125,22 +118,16 @@
 
             _createUI: function() {
                 var $ = domConstruct.create,
-                    styleprops = {
+                    sizeProperties = {
                         'width': this.width + 'px',
                         'height': this.height + 'px'
-                    };
-
-                this._canvas = $('canvas', {
-                    'width': this.width,
-                    'height': this.height,
-                    'style': 'border: ' + this.gridborder + 'px solid ' + this.gridcolor
-                });
-
-                this._image  = $('img', {
-                        'width': this.width + 'px',
-                        'height': this.height + 'px',
+                    },
+                    allProperties = lang.mixin(sizeProperties, {
                         'style': 'border: ' + this.gridborder + 'px solid ' + this.gridcolor
                     });
+
+                this._canvas = $('canvas', allProperties);
+                this._image  = $('img', allProperties);
                 
                 this._reset = $('button', {
                     'class': 'btn',
@@ -154,7 +141,7 @@
                 this.domNode.appendChild(this._image);
                 this.domNode.appendChild(this._reset);
                 
-                domStyle.set(this.domNode, styleprops);
+                domStyle.set(this.domNode, sizeProperties);
 
                 this._context = this._canvas.getContext('2d');
             },
