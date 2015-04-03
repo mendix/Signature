@@ -200,7 +200,6 @@
                         return false;
                     }
                 );
-
             },
 
             _getCoords: function(e) {
@@ -214,32 +213,28 @@
             },
 
             _beginCurve: function(e) {
-                var context  = this._context,
-                    buf      = this._bezierBuf = [],
-                    pos      = this._getCoords(e),
-                    touch    = this._touchSupport,
-                    handlers = this._handlers = [];
+                this._bezierBuf = [];
+                this._handlers = [];
 
                 this._stopTimeout();
 
-                context.strokeStyle = this.pencolor;
-                context.lineJoin    = 'round';
-                context.lineWidth   = this.pensize;
+                this._context.strokeStyle = this.pencolor;
+                this._context.lineJoin    = 'round';
+                this._context.lineWidth   = this.pensize;
 
-                context.beginPath();
+                this._context.beginPath();
 
-                handlers.push(this.connect(window, touch ? 'touchmove' : 'mousemove', dojo.hitch(this, this._eventMouseMove)));
-                handlers.push(this.connect(window, touch ? 'touchend' : 'mouseup', dojo.hitch(this, this._eventMouseUp)));
+                this._handlers.push(this.connect(window, this._touchSupport ? 'touchmove' : 'mousemove', dojo.hitch(this, this._eventMouseMove)));
+                this._handlers.push(this.connect(window, this._touchSupport ? 'touchend' : 'mouseup', dojo.hitch(this, this._eventMouseUp)));
             },
 
             _updateCurve: function(e) {
                 console.log(this.id + '.updateCurve');
 
                 var context = this._context,
-                    buf     = this._bezierBuf,
-                    pos     = this._getCoords(e),
-                    bp      = null;
-
+                    buf = this._bezierBuf,
+                    pos = this._getCoords(e),
+                    bp = null;
 
                 this._stopTimeout();
 
@@ -247,7 +242,7 @@
                     buf.push(pos);
 
                     if (buf.length === 4) {
-                        bp = this._bezierPoint(buf[0], buf[1], buf[2], buf[3]);
+                        bp = this._bezierPoint.apply(this, buf);
 
                         context.lineTo(bp.x, bp.y);
                         context.stroke();
@@ -368,9 +363,9 @@
             _bezierPoint: function(c1, c2, c3, c4) {
                 return {
                     x: c1.x * this._bezier1 + c2.x * this._bezier2 +
-                    c3.x * this._bezier3 + c4.x * this._bezier4,
+                        c3.x * this._bezier3 + c4.x * this._bezier4,
                     y: c1.y * this._bezier1 + c2.y * this._bezier2 +
-                    c3.y * this._bezier3 + c4.y * this._bezier4
+                        c3.y * this._bezier3 + c4.y * this._bezier4
                 };
             },
 
