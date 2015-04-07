@@ -153,9 +153,7 @@
             },
 
             _drawGrid: function() {
-                if (!this.showgrid) {
-                    return;
-                }
+                if (!this.showgrid) return;
 
                 var x = this.gridx,
                     y = this.gridy,
@@ -165,17 +163,17 @@
 
                 context.beginPath();
 
-                for (x; x < width; x += this.gridx) {
+                for (; x < width; x += this.gridx) {
                     context.moveTo(x, 0);
                     context.lineTo(x, this._canvas.height);
                 }
 
-                for (y; y < height; y += this.gridy) {
+                for (; y < height; y += this.gridy) {
                     context.moveTo(0, y);
                     context.lineTo(this._canvas.width, y);
                 }
 
-                context.lineWidth   = 1;
+                context.lineWidth = 1;
                 context.strokeStyle = this.gridcolor;
                 context.stroke();
             },
@@ -316,6 +314,7 @@
             },
 
             _resetCanvas: function() {
+                window.alert("Reset the canvas");
                 console.log(this.id + '.resetCanvas');
 
                 this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
