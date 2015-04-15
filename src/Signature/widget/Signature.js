@@ -91,7 +91,7 @@
 
                 this._bezierBuf = [];
 
-                this._touchSupport = window.hasOwnProperty('ontouchstart');
+                this._touchSupport = ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch;
             },
 
             _createUI: function() {
