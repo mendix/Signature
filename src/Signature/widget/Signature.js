@@ -1,11 +1,11 @@
 /*jslint white: true nomen: true plusplus: true */
-/*global mx, mxui, mendix, dojo, require, console, define, module, logger */
+/*global mx, mxui, window, document, mendix, dojo, require, console, define, module, logger */
 /**
 	Signature
 	========================
 
 	@file      : Signature.js
-	@version   : 2.0
+	@version   : 2.1
 	@author    : Maxim Oei, Richard Edens, Roeland Salij
 	@date      : 22-08-2014
 	@copyright : Mendix Technology BV
