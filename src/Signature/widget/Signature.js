@@ -314,7 +314,6 @@
             },
 
             _resetCanvas: function() {
-                window.alert("Reset the canvas");
                 console.log(this.id + '.resetCanvas');
 
                 this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
