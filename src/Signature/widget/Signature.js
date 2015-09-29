@@ -177,7 +177,7 @@
             },
 
             _setupEvents: function() {
-                this.connect(this._canvas, (this._touchSupport ? 'touchstart' : 'mousedown'), this._eventMouseDown);
+                this.connect(this._canvas, (this._touchSupport ? 'touchstart' : 'mousedown'), this._beginCurve);
                 this.connect(this._reset, 'click', this._eventResetClicked);
 
                 // This prevents the 'dragging image' annoyance when someone tries to
@@ -203,6 +203,10 @@
             },
 
             _beginCurve: function(e) {
+                domEvent.stop(e);
+
+                if (this.get('disabled')) return;
+
                 this._bezierBuf = [];
                 this._handlers = [];
 
@@ -214,11 +218,13 @@
 
                 this._context.beginPath();
 
-                this._handlers.push(this.connect(window, this._touchSupport ? 'touchmove' : 'mousemove', this._eventMouseMove));
-                this._handlers.push(this.connect(window, this._touchSupport ? 'touchend' : 'mouseup', this._eventMouseUp));
+                this._handlers.push(this.connect(window, this._touchSupport ? 'touchmove' : 'mousemove', this._updateCurve));
+                this._handlers.push(this.connect(window, this._touchSupport ? 'touchend' : 'mouseup', this._endCurve));
             },
 
             _updateCurve: function(e) {
+                domEvent.stop(e);
+
                 var context = this._context,
                     buf = this._bezierBuf,
                     pos = this._getCoords(e),
@@ -245,6 +251,8 @@
             },
 
             _endCurve: function() {
+                domEvent.stop(e);
+
                 var buf = this._bezierBuf,
                     i = 0,
                     pos = null,
@@ -254,11 +262,12 @@
                 this._stopTimeout();
 
                 // Finish last points in Bezier buffer
-                while(buf[i]) {
+                while (buf[i]) {
                     pos = buf[i];
                     this._context.lineTo(pos.x, pos.y);
                     i++;
                 }
+
                 this._context.stroke();
 
                 this._bezierBuf = null;
@@ -270,26 +279,6 @@
                 }
 
                 this._timer = setTimeout(dojo.hitch(this, this._finalizeSignature), this.timeout);
-            },
-
-            _eventMouseDown: function(e) {
-                domEvent.stop(e);
-
-                if (!this.get('disabled')) {
-                    this._beginCurve(e);
-                }
-            },
-
-            _eventMouseMove: function(e) {
-                domEvent.stop(e);
-
-                this._updateCurve(e);
-            },
-
-            _eventMouseUp: function(e) {
-                domEvent.stop(e);
-
-                this._endCurve();
             },
 
             _eventResetClicked: function(e) {
