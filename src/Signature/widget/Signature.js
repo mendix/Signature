@@ -24,7 +24,7 @@ require([
     return declare("Signature.widget.Signature", [ _WidgetBase, _Templated ], {
         _contextGuid: null,
         _contextObj: null,
-        _handle: null,
+        _handlers: null,
 
         _smoothingpct: 0.9,
 
