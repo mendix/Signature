@@ -19,8 +19,8 @@
 (function() {
     require([
         'mxui/widget/_WidgetBase', 'dijit/_Widget', 'dijit/_TemplatedMixin',
-        'mxui/dom', 'dojo/dom', 'dojo/dom-construct', 'dojo/ready', 'dojo/query', 'dojo/dom-prop', 'dojo/dom-geometry', 'dojo/dom-class', 'dojo/dom-style', 'dojo/on', 'dojo/_base/lang', 'dojo/_base/declare'
-    ], function(_WidgetBase, _Widget, _Templated, domMx,dom, domConstruct, domReady, domQuery, domProp, domGeom, domClass, domStyle, on, lang, declare) {
+        'mxui/dom', 'dojo/dom', 'dojo/dom-construct', 'dojo/_base/event', 'dojo/ready', 'dojo/query', 'dojo/dom-prop', 'dojo/dom-geometry', 'dojo/dom-class', 'dojo/dom-style', 'dojo/on', 'dojo/_base/lang', 'dojo/_base/declare'
+    ], function(_WidgetBase, _Widget, _Templated, domMx,dom, domConstruct, domEvent, domReady, domQuery, domProp, domGeom, domClass, domStyle, on, lang, declare) {
 
         return declare('Signature.widget.Signature', [ _WidgetBase, _Widget, _Templated ], {
             _contextGuid: null,
@@ -186,7 +186,7 @@
                     this._image,
                     this._touchSupport ? 'touchstart' : 'mousedown',
                     function(e) {
-                        dojo.stopEvent(e);
+                        domEvent.stop(e);
                         return false;
                     }
                 );
@@ -273,7 +273,7 @@
             },
 
             _eventMouseDown: function(e) {
-                dojo.stopEvent(e);
+                domEvent.stop(e);
 
                 if (!this.get('disabled')) {
                     this._beginCurve(e);
@@ -281,13 +281,13 @@
             },
 
             _eventMouseMove: function(e) {
-                dojo.stopEvent(e);
+                domEvent.stop(e);
 
                 this._updateCurve(e);
             },
 
             _eventMouseUp: function(e) {
-                dojo.stopEvent(e);
+                domEvent.stop(e);
 
                 this._endCurve();
             },
