@@ -18,11 +18,11 @@
 */
 (function() {
     require([
-        'mxui/widget/_WidgetBase', 'dijit/_Widget', 'dijit/_TemplatedMixin',
-        'mxui/dom', 'dojo/dom', 'dojo/dom-construct', 'dojo/_base/event', 'dojo/ready', 'dojo/query', 'dojo/dom-prop', 'dojo/dom-geometry', 'dojo/dom-class', 'dojo/dom-style', 'dojo/on', 'dojo/_base/lang', 'dojo/_base/declare'
+        "mxui/widget/_WidgetBase", "dijit/_Widget", "dijit/_TemplatedMixin",
+        "mxui/dom", "dojo/dom", "dojo/dom-construct", "dojo/_base/event", "dojo/ready", "dojo/query", "dojo/dom-prop", "dojo/dom-geometry", "dojo/dom-class", "dojo/dom-style", "dojo/on", "dojo/_base/lang", "dojo/_base/declare"
     ], function(_WidgetBase, _Widget, _Templated, domMx,dom, domConstruct, domEvent, domReady, domQuery, domProp, domGeom, domClass, domStyle, on, lang, declare) {
 
-        return declare('Signature.widget.Signature', [ _WidgetBase, _Widget, _Templated ], {
+        return declare("Signature.widget.Signature", [ _WidgetBase, _Widget, _Templated ], {
             _contextGuid: null,
             _contextObj: null,
             _handle: null,
@@ -42,7 +42,7 @@
             _touchSupport: false,
             _bezierBuf: null,
 
-            templatePath: dojo.moduleUrl('Signature', 'widget/templates/Signature.html'),
+            templatePath: dojo.moduleUrl("Signature", "widget/templates/Signature.html"),
 
             postCreate: function() {
                 this._setupWidget();
@@ -51,9 +51,9 @@
             },
 
             startup: function() {
-                this.set('disabled', this.readonly);
+                this.set("disabled", this.readonly);
 
-                var path = this.dataUrl.split('/');
+                var path = this.dataUrl.split("/");
                 this._attribute = path[path.length - 1];
                 this._path = path.splice(0, path.length - 1);
             },
@@ -69,13 +69,13 @@
             },
 
             enable: function() {
-                dojo.attr(this._reset, 'disabled', false);
-                dojo.removeClass(this.domNode, 'signhereSignature_disabled');
+                dojo.attr(this._reset, "disabled", false);
+                dojo.removeClass(this.domNode, "signhereSignature_disabled");
             },
 
             disable: function() {
-                dojo.attr(this._reset, 'disabled', true);
-                dojo.addClass(this.domNode, 'signhereSignature_disabled');
+                dojo.attr(this._reset, "disabled", true);
+                dojo.addClass(this.domNode, "signhereSignature_disabled");
             },
 
             _setupWidget: function() {
@@ -89,28 +89,28 @@
 
                 this._bezierBuf = [];
 
-                this._touchSupport = ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch;
+                this._touchSupport = ("ontouchstart" in window) || window.DocumentTouch && document instanceof DocumentTouch;
             },
 
             _createUI: function() {
                 var $ = domConstruct.create,
                     sizeProperties = {
-                        'width': this.width + 'px',
-                        'height': this.height + 'px'
+                        "width": this.width + "px",
+                        "height": this.height + "px"
                     },
                     allProperties = lang.mixin(sizeProperties, {
-                        'style': 'border: ' + this.gridborder + 'px solid ' + this.gridcolor
+                        "style": "border: " + this.gridborder + "px solid " + this.gridcolor
                     });
 
-                this._canvas = $('canvas', allProperties);
-                this._image  = $('img', allProperties);
+                this._canvas = $("canvas", allProperties);
+                this._image  = $("img", allProperties);
 
-                this._reset = $('button', {
-                    'class': 'btn',
-                    'style': {
-                        'width': (this.width + 4) + 'px'
+                this._reset = $("button", {
+                    "class": "btn",
+                    "style": {
+                        "width": (this.width + 4) + "px"
                     },
-                    'innerHTML':  this.resetcaption
+                    "innerHTML":  this.resetcaption
                 });
 
                 this.domNode.appendChild(this._canvas);
@@ -119,7 +119,7 @@
 
                 domStyle.set(this.domNode, sizeProperties);
 
-                this._context = this._canvas.getContext('2d');
+                this._context = this._canvas.getContext("2d");
             },
 
             _updateObject: function(obj, callback) {
@@ -133,7 +133,7 @@
                     this._hideImage();
                 }
 
-                this.set('disabled', obj ? false : true);
+                this.set("disabled", obj ? false : true);
 
                 mendix.lang.nullExec(callback);
             },
@@ -141,13 +141,13 @@
             _showImage: function() {
                 this._image.src = this._mxObject.get(this.dataUrl);
 
-                dojo.replaceClass(this.domNode, 'signature_set', 'signature_unset');
+                dojo.replaceClass(this.domNode, "signature_set", "signature_unset");
             },
 
             _hideImage: function() {
-                this._image.src = '';
+                this._image.src = "";
 
-                domClass.replace(this.domNode, 'signature_unset', 'signature_set');
+                domClass.replace(this.domNode, "signature_unset", "signature_set");
             },
 
             _drawGrid: function() {
@@ -177,14 +177,14 @@
             },
 
             _setupEvents: function() {
-                this.connect(this._canvas, (this._touchSupport ? 'touchstart' : 'mousedown'), this._beginCurve);
-                this.connect(this._reset, 'click', this._eventResetClicked);
+                this.connect(this._canvas, (this._touchSupport ? "touchstart" : "mousedown"), this._beginCurve);
+                this.connect(this._reset, "click", this._eventResetClicked);
 
-                // This prevents the 'dragging image' annoyance when someone tries to
+                // This prevents the "dragging image" annoyance when someone tries to
                 // draw on the image.
                 this.connect(
                     this._image,
-                    this._touchSupport ? 'touchstart' : 'mousedown',
+                    this._touchSupport ? "touchstart" : "mousedown",
                     function(e) {
                         domEvent.stop(e);
                         return false;
@@ -205,7 +205,7 @@
             _beginCurve: function(e) {
                 domEvent.stop(e);
 
-                if (this.get('disabled')) return;
+                if (this.get("disabled")) return;
 
                 this._bezierBuf = [];
                 this._handlers = [];
@@ -213,13 +213,13 @@
                 this._stopTimeout();
 
                 this._context.strokeStyle = this.pencolor;
-                this._context.lineJoin    = 'round';
+                this._context.lineJoin    = "round";
                 this._context.lineWidth   = this.pensize;
 
                 this._context.beginPath();
 
-                this._handlers.push(this.connect(window, this._touchSupport ? 'touchmove' : 'mousemove', this._updateCurve));
-                this._handlers.push(this.connect(window, this._touchSupport ? 'touchend' : 'mouseup', this._endCurve));
+                this._handlers.push(this.connect(window, this._touchSupport ? "touchmove" : "mousemove", this._updateCurve));
+                this._handlers.push(this.connect(window, this._touchSupport ? "touchend" : "mouseup", this._endCurve));
             },
 
             _updateCurve: function(e) {
@@ -282,7 +282,7 @@
             },
 
             _eventResetClicked: function(e) {
-                if (!this.get('disabled')) {
+                if (!this.get("disabled")) {
                     this._resetMxObject();
                     this._resetCanvas();
 
@@ -299,7 +299,7 @@
             },
 
             _resetMxObject: function() {
-                this._mxObject.set(this.dataUrl, '');
+                this._mxObject.set(this.dataUrl, "");
             },
 
             _stopTimeout: function() {
@@ -314,7 +314,7 @@
                     if (mxobj.has(this.dataUrl)) {
                         mxobj.set(this.dataUrl, this._canvas.toDataURL());
                     } else {
-                        logger.error(this.id + '.finalizeSignature: no dataUrl attribute found.');
+                        logger.error(this.id + ".finalizeSignature: no dataUrl attribute found.");
                     }
                 }
 
