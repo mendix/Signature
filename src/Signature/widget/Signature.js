@@ -342,16 +342,12 @@
             },
 
             _setDisabledAttr: function(value) {
-                var argumentsCopy = [];
-
-                if (typeof this._attribute === 'undefined' || this._attribute === null) {
-                    this._attribute = '';
-                }
-                if (this.readonly || !this._mxObject || this._mxObject.isReadonlyAttr(this._attribute)) {
-                    value = true; 
-                }
-
-                return this.inherited(arguments, [ value ]);
+                var isDisabled = this.readonly ||
+                    !this._mxObject ||
+                    !this._attribute ||
+                    this._mxObject.isReadonlyAttr(this._attribute) ||
+                    value;
+                return this.inherited(arguments, [ isDisabled ]);
             }
         });
     });
