@@ -3,22 +3,27 @@
 /**
 	Signature
 	========================
-
-	@file      : Signature.js
-	@version   : 2.1
-	@author    : Maxim Oei, Richard Edens, Roeland Salij
-	@date      : 22-08-2014
-	@copyright : Mendix Technology BV
+	@copyright : Mendix bv
 	@license   : Apache License, Version 2.0, January 2004
-
-	Documentation
-    ========================
-	Complete any delivery service App with this Signature widget.
-    This widget allows you to save a signature to an attribute.
 */
 require([
-    "mxui/widget/_WidgetBase", "dijit/_Widget", "dijit/_TemplatedMixin",
-    "mxui/dom", "dojo/dom", "dojo/dom-construct", "dojo/_base/event", "dojo/ready", "dojo/query", "dojo/dom-prop", "dojo/dom-geometry", "dojo/dom-class", "dojo/dom-style", "dojo/touch", "dojo/on", "dojo/_base/lang", "dojo/_base/declare"
+    "mxui/widget/_WidgetBase",
+    "dijit/_Widget",
+    "dijit/_TemplatedMixin",
+    "mxui/dom",
+    "dojo/dom",
+    "dojo/dom-construct",
+    "dojo/_base/event",
+    "dojo/ready",
+    "dojo/query",
+    "dojo/dom-prop",
+    "dojo/dom-geometry",
+    "dojo/dom-class",
+    "dojo/dom-style",
+    "dojo/touch",
+    "dojo/on",
+    "dojo/_base/lang",
+    "dojo/_base/declare"
 ], function(_WidgetBase, _Widget, _Templated, domMx, dom, domConstruct, domEvent, domReady, domQuery, domProp, domGeom, domClass, domStyle, dojoTouch, on, lang, declare) {
 
     return declare("Signature.widget.Signature", [ _WidgetBase, _Widget, _Templated ], {
