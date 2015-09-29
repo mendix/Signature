@@ -22,10 +22,6 @@ require([
 ], function(_WidgetBase, _Templated, dom, domConstruct, dojoArray, domEvent, domClass, domStyle, dojoTouch, on, lang, declare) {
 
     return declare("Signature.widget.Signature", [ _WidgetBase, _Templated ], {
-        _contextGuid: null,
-        _contextObj: null,
-        _handlers: null,
-
         _smoothingpct: 0.9,
 
         _mxObject: null,
@@ -38,8 +34,9 @@ require([
 
         _timer: null,
         _bezierBuf: null,
+        _handlers: null,
 
-        templatePath: dojo.moduleUrl("Signature", "widget/templates/Signature.html"),
+        templatePath: require.toUrl("Signature/widget/templates/Signature.html"),
 
         postCreate: function() {
             this._setupWidget();
