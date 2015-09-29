@@ -9,7 +9,6 @@
 require([
     "mxui/widget/_WidgetBase",
     "dijit/_TemplatedMixin",
-    "mxui/dom",
     "dojo/dom",
     "dojo/dom-construct",
     "dojo/_base/array",
@@ -24,7 +23,7 @@ require([
     "dojo/on",
     "dojo/_base/lang",
     "dojo/_base/declare"
-], function(_WidgetBase, _Templated, domMx, dom, domConstruct, dojoArray, domEvent, domReady, domQuery, domProp, domGeom, domClass, domStyle, dojoTouch, on, lang, declare) {
+], function(_WidgetBase, _Templated, dom, domConstruct, dojoArray, domEvent, domReady, domQuery, domProp, domGeom, domClass, domStyle, dojoTouch, on, lang, declare) {
 
     return declare("Signature.widget.Signature", [ _WidgetBase, _Templated ], {
         _contextGuid: null,
