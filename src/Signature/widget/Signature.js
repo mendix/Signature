@@ -177,8 +177,8 @@
             },
 
             _setupEvents: function() {
-                this.connect(this._canvas, (this._touchSupport ? 'touchstart' : 'mousedown'), '_eventMouseDown');
-                this.connect(this._reset, 'click', dojo.hitch(this, this._eventResetClicked));
+                this.connect(this._canvas, (this._touchSupport ? 'touchstart' : 'mousedown'), this._eventMouseDown);
+                this.connect(this._reset, 'click', this._eventResetClicked);
 
                 // This prevents the 'dragging image' annoyance when someone tries to
                 // draw on the image.
@@ -214,8 +214,8 @@
 
                 this._context.beginPath();
 
-                this._handlers.push(this.connect(window, this._touchSupport ? 'touchmove' : 'mousemove', dojo.hitch(this, this._eventMouseMove)));
-                this._handlers.push(this.connect(window, this._touchSupport ? 'touchend' : 'mouseup', dojo.hitch(this, this._eventMouseUp)));
+                this._handlers.push(this.connect(window, this._touchSupport ? 'touchmove' : 'mousemove', this._eventMouseMove));
+                this._handlers.push(this.connect(window, this._touchSupport ? 'touchend' : 'mouseup', this._eventMouseUp));
             },
 
             _updateCurve: function(e) {
