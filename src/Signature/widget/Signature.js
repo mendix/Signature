@@ -45,8 +45,6 @@
             templatePath: dojo.moduleUrl('Signature', 'widget/templates/Signature.html'),
 
             postCreate: function() {
-                console.log('Signature - postCreate');
-
                 this._setupWidget();
                 this._createUI();
                 this._setupEvents();
@@ -221,8 +219,6 @@
             },
 
             _updateCurve: function(e) {
-                console.log(this.id + '.updateCurve');
-
                 var context = this._context,
                     buf = this._bezierBuf,
                     pos = this._getCoords(e),
@@ -277,8 +273,6 @@
             },
 
             _eventMouseDown: function(e) {
-                console.log(this.id + '._eventMouseDown');
-
                 dojo.stopEvent(e);
 
                 if (!this.get('disabled')) {
@@ -287,24 +281,18 @@
             },
 
             _eventMouseMove: function(e) {
-                console.log(this.id + '._eventMouseMove');
-
                 dojo.stopEvent(e);
 
                 this._updateCurve(e);
             },
 
             _eventMouseUp: function(e) {
-                console.log(this.id + '._eventMouseUp');
-
                 dojo.stopEvent(e);
 
                 this._endCurve();
             },
 
             _eventResetClicked: function(e) {
-                console.log(this.id + '._eventResetClicked');
-
                 if (!this.get('disabled')) {
                     this._resetMxObject();
                     this._resetCanvas();
@@ -314,8 +302,6 @@
             },
 
             _resetCanvas: function() {
-                console.log(this.id + '.resetCanvas');
-
                 this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
                 this._bezierBuf = [];
@@ -324,22 +310,16 @@
             },
 
             _resetMxObject: function() {
-                console.log(this.id + '.resetMxObject');
-
                 this._mxObject.set(this.dataUrl, '');
             },
 
             _stopTimeout: function() {
-                console.log(this.id + '._stopTimeout');
-
                 if (this._timer) {
                     clearTimeout(this._timer);
                 }
             },
 
             _finalizeSignature: function() {
-                console.log(this.id + '.finalizeSignature');
-
                 var mxobj = this._mxObject;
                 if (mxobj) {
                     if (mxobj.has(this.dataUrl)) {
