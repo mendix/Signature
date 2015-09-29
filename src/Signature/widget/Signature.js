@@ -19,8 +19,8 @@
 (function() {
     require([
         "mxui/widget/_WidgetBase", "dijit/_Widget", "dijit/_TemplatedMixin",
-        "mxui/dom", "dojo/dom", "dojo/dom-construct", "dojo/_base/event", "dojo/ready", "dojo/query", "dojo/dom-prop", "dojo/dom-geometry", "dojo/dom-class", "dojo/dom-style", "dojo/on", "dojo/_base/lang", "dojo/_base/declare"
-    ], function(_WidgetBase, _Widget, _Templated, domMx,dom, domConstruct, domEvent, domReady, domQuery, domProp, domGeom, domClass, domStyle, on, lang, declare) {
+        "mxui/dom", "dojo/dom", "dojo/dom-construct", "dojo/_base/event", "dojo/ready", "dojo/query", "dojo/dom-prop", "dojo/dom-geometry", "dojo/dom-class", "dojo/dom-style", "dojo/touch", "dojo/on", "dojo/_base/lang", "dojo/_base/declare"
+    ], function(_WidgetBase, _Widget, _Templated, domMx, dom, domConstruct, domEvent, domReady, domQuery, domProp, domGeom, domClass, domStyle, dojoTouch, on, lang, declare) {
 
         return declare("Signature.widget.Signature", [ _WidgetBase, _Widget, _Templated ], {
             _contextGuid: null,
@@ -38,8 +38,6 @@
             _context: null,
 
             _timer: null,
-
-            _touchSupport: false,
             _bezierBuf: null,
 
             templatePath: dojo.moduleUrl("Signature", "widget/templates/Signature.html"),
@@ -88,8 +86,6 @@
                 this._bezier4 = u * u * u;
 
                 this._bezierBuf = [];
-
-                this._touchSupport = ("ontouchstart" in window) || window.DocumentTouch && document instanceof DocumentTouch;
             },
 
             _createUI: function() {
@@ -177,19 +173,15 @@
             },
 
             _setupEvents: function() {
-                this.connect(this._canvas, (this._touchSupport ? "touchstart" : "mousedown"), this._beginCurve);
-                this.connect(this._reset, "click", this._eventResetClicked);
+                on(this._canvas, dojoTouch.press, lang.hitch(this, this._beginCurve));
+                on(this._reset, "click", lang.hitch(this, this._eventResetClicked));
 
                 // This prevents the "dragging image" annoyance when someone tries to
                 // draw on the image.
-                this.connect(
-                    this._image,
-                    this._touchSupport ? "touchstart" : "mousedown",
-                    function(e) {
-                        domEvent.stop(e);
-                        return false;
-                    }
-                );
+                on(this._image, dojoTouch.press, function(e) {
+                    domEvent.stop(e);
+                    return false;
+                });
             },
 
             _getCoords: function(e) {
@@ -208,7 +200,6 @@
                 if (this.get("disabled")) return;
 
                 this._bezierBuf = [];
-                this._handlers = [];
 
                 this._stopTimeout();
 
@@ -218,8 +209,10 @@
 
                 this._context.beginPath();
 
-                this._handlers.push(this.connect(window, this._touchSupport ? "touchmove" : "mousemove", this._updateCurve));
-                this._handlers.push(this.connect(window, this._touchSupport ? "touchend" : "mouseup", this._endCurve));
+                this._handlers = [
+                    on(window, dojoTouch.move, lang.hitch(this, this._updateCurve)),
+                    on(window, dojoTouch.release, lang.hitch(this, this._endCurve))
+                ];
             },
 
             _updateCurve: function(e) {
@@ -253,30 +246,18 @@
             _endCurve: function() {
                 domEvent.stop(e);
 
-                var buf = this._bezierBuf,
-                    i = 0,
-                    pos = null,
-                    j = 0,
-                    handlers = null;
-
                 this._stopTimeout();
 
                 // Finish last points in Bezier buffer
-                while (buf[i]) {
-                    pos = buf[i];
-                    this._context.lineTo(pos.x, pos.y);
-                    i++;
-                }
+                dojoArray.forEach(this._bezierBuf, function(position) {
+                    this._context.lineTo(position.x, position.y);
+                }, this);
 
                 this._context.stroke();
 
-                this._bezierBuf = null;
-
-                while(this._handlers[j]){
-                    handlers = this._handlers[j];
-                    this.disconnect(handlers);
-                    j++;
-                }
+                dojoArray.forEach(this._handlers, function(handler) {
+                    handler.remove();
+                });
 
                 this._timer = setTimeout(dojo.hitch(this, this._finalizeSignature), this.timeout);
             },
