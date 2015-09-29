@@ -13,6 +13,7 @@ require([
     "mxui/dom",
     "dojo/dom",
     "dojo/dom-construct",
+    "dojo/_base/array",
     "dojo/_base/event",
     "dojo/ready",
     "dojo/query",
@@ -24,7 +25,7 @@ require([
     "dojo/on",
     "dojo/_base/lang",
     "dojo/_base/declare"
-], function(_WidgetBase, _Widget, _Templated, domMx, dom, domConstruct, domEvent, domReady, domQuery, domProp, domGeom, domClass, domStyle, dojoTouch, on, lang, declare) {
+], function(_WidgetBase, _Widget, _Templated, domMx, dom, domConstruct, dojoArray, domEvent, domReady, domQuery, domProp, domGeom, domClass, domStyle, dojoTouch, on, lang, declare) {
 
     return declare("Signature.widget.Signature", [ _WidgetBase, _Widget, _Templated ], {
         _contextGuid: null,
@@ -242,7 +243,7 @@ require([
             }
         },
 
-        _endCurve: function() {
+        _endCurve: function(e) {
             domEvent.stop(e);
 
             this._stopTimeout();
