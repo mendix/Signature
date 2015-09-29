@@ -13,7 +13,6 @@ require([
     "dojo/dom-construct",
     "dojo/_base/array",
     "dojo/_base/event",
-    "dojo/query",
     "dojo/dom-prop",
     "dojo/dom-geometry",
     "dojo/dom-class",
@@ -22,7 +21,7 @@ require([
     "dojo/on",
     "dojo/_base/lang",
     "dojo/_base/declare"
-], function(_WidgetBase, _Templated, dom, domConstruct, dojoArray, domEvent, domQuery, domProp, domGeom, domClass, domStyle, dojoTouch, on, lang, declare) {
+], function(_WidgetBase, _Templated, dom, domConstruct, dojoArray, domEvent, domProp, domGeom, domClass, domStyle, dojoTouch, on, lang, declare) {
 
     return declare("Signature.widget.Signature", [ _WidgetBase, _Templated ], {
         _contextGuid: null,
