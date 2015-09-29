@@ -3,376 +3,311 @@
 /**
 	Signature
 	========================
-
-	@file      : Signature.js
-	@version   : 2.1
-	@author    : Maxim Oei, Richard Edens, Roeland Salij
-	@date      : 22-08-2014
-	@copyright : Mendix Technology BV
+	@copyright : Mendix bv
 	@license   : Apache License, Version 2.0, January 2004
-
-	Documentation
-    ========================
-	Complete any delivery service App with this Signature widget.
-    This widget allows you to save a signature to an attribute.
 */
-(function() {
-    require([
-        'mxui/widget/_WidgetBase', 'dijit/_Widget', 'dijit/_TemplatedMixin',
-        'mxui/dom', 'dojo/dom', 'dojo/dom-construct', 'dojo/ready', 'dojo/query', 'dojo/dom-prop', 'dojo/dom-geometry', 'dojo/dom-class', 'dojo/dom-style', 'dojo/on', 'dojo/_base/lang', 'dojo/_base/declare'
-    ], function(_WidgetBase, _Widget, _Templated, domMx,dom, domConstruct, domReady, domQuery, domProp, domGeom, domClass, domStyle, on, lang, declare) {
+require([
+    "mxui/widget/_WidgetBase",
+    "dijit/_TemplatedMixin",
+    "dojo/dom",
+    "dojo/dom-construct",
+    "dojo/_base/array",
+    "dojo/_base/event",
+    "dojo/dom-class",
+    "dojo/dom-style",
+    "dojo/touch",
+    "dojo/on",
+    "dojo/_base/lang",
+    "dojo/_base/declare"
+], function(_WidgetBase, _Templated, dom, domConstruct, dojoArray, domEvent, domClass, domStyle, dojoTouch, on, lang, declare) {
 
-        return declare('Signature.widget.Signature', [ _WidgetBase, _Widget, _Templated ], {
-            _contextGuid: null,
-            _contextObj: null,
-            _handle: null,
+    return declare("Signature.widget.Signature", [ _WidgetBase, _Templated ], {
+        _smoothingpct: 0.9,
 
-            _smoothingpct: 0.9,
+        _mxObject: null,
+        _attribute: null,
+        _path: null,
 
-            _mxObject: null,
-            _attribute: null,
-            _path: null,
+        _canvas: null,
+        _reset: null,
+        _context: null,
 
-            _canvas: null,
-            _reset: null,
-            _context: null,
+        _timer: null,
+        _bezierBuf: null,
+        _handlers: null,
 
-            _timer: null,
+        templatePath: require.toUrl("Signature/widget/templates/Signature.html"),
 
-            _touchSupport: false,
-            _bezierBuf: null,
+        postCreate: function() {
+            this._setupWidget();
+            this._createUI();
+            this._setupEvents();
+        },
 
-            templatePath: dojo.moduleUrl('Signature', 'widget/templates/Signature.html'),
+        startup: function() {
+            this.set("disabled", this.readonly);
 
-            postCreate: function() {
-                console.log('Signature - postCreate');
+            var path = this.dataUrl.split("/");
+            this._attribute = path[path.length - 1];
+            this._path = path.splice(0, path.length - 1);
+        },
 
-                this._setupWidget();
-                this._createUI();
-                this._setupEvents();
-            },
+        update: function(obj, callback) {
+            if (obj) {
+                obj.fetch(this._path, dojo.hitch(this, function(obj) {
+                    this._updateObject(obj, callback);
+                }));
+            } else {
+                this._updateObject(null, callback);
+            }
+        },
 
-            startup: function() {
-                this.set('disabled', this.readonly);
+        enable: function() {
+            dojo.attr(this._reset, "disabled", false);
+            dojo.removeClass(this.domNode, "signhereSignature_disabled");
+        },
 
-                var path = this.dataUrl.split('/');
-                this._attribute = path[path.length - 1];
-                this._path = path.splice(0, path.length - 1);
-            },
+        disable: function() {
+            dojo.attr(this._reset, "disabled", true);
+            dojo.addClass(this.domNode, "signhereSignature_disabled");
+        },
 
-            update: function(obj, callback) {
-                if (obj) {
-                    obj.fetch(this._path, dojo.hitch(this, function(obj) {
-                        this._updateObject(obj, callback);
-                    }));
-                } else {
-                    this._updateObject(null, callback);
-                }
-            },
+        _setupWidget: function() {
+            var t = this._smoothingpct,
+                u = 1 - t;
 
-            enable: function() {
-                dojo.attr(this._reset, 'disabled', false);
-                dojo.removeClass(this.domNode, 'signhereSignature_disabled');
-            },
+            this._bezier1 = t * t * t;
+            this._bezier2 = 3 * t * t * u;
+            this._bezier3 = 3 * t * u * u;
+            this._bezier4 = u * u * u;
 
-            disable: function() {
-                dojo.attr(this._reset, 'disabled', true);
-                dojo.addClass(this.domNode, 'signhereSignature_disabled');
-            },
+            this._bezierBuf = [];
+        },
 
-            _setupWidget: function() {
-                var t = this._smoothingpct,
-                    u = 1 - t;
-
-                this._bezier1 = t * t * t;
-                this._bezier2 = 3 * t * t * u;
-                this._bezier3 = 3 * t * u * u;
-                this._bezier4 = u * u * u;
-
-                this._bezierBuf = [];
-
-                this._touchSupport = ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch;
-            },
-
-            _createUI: function() {
-                var $ = domConstruct.create,
-                    sizeProperties = {
-                        'width': this.width + 'px',
-                        'height': this.height + 'px'
-                    },
-                    allProperties = lang.mixin(sizeProperties, {
-                        'style': 'border: ' + this.gridborder + 'px solid ' + this.gridcolor
-                    });
-
-                this._canvas = $('canvas', allProperties);
-                this._image  = $('img', allProperties);
-
-                this._reset = $('button', {
-                    'class': 'btn',
-                    'style': {
-                        'width': (this.width + 4) + 'px'
-                    },
-                    'innerHTML':  this.resetcaption
+        _createUI: function() {
+            var $ = domConstruct.create,
+                sizeProperties = {
+                    "width": this.width + "px",
+                    "height": this.height + "px"
+                },
+                allProperties = lang.mixin(sizeProperties, {
+                    "style": "border: " + this.gridborder + "px solid " + this.gridcolor
                 });
 
-                this.domNode.appendChild(this._canvas);
-                this.domNode.appendChild(this._image);
-                this.domNode.appendChild(this._reset);
+            this._canvas = $("canvas", allProperties);
+            this._image  = $("img", allProperties);
 
-                domStyle.set(this.domNode, sizeProperties);
+            this._reset = $("button", {
+                "class": "btn",
+                "style": {
+                    "width": (this.width + 4) + "px"
+                },
+                "innerHTML":  this.resetcaption
+            });
 
-                this._context = this._canvas.getContext('2d');
-            },
+            this.domNode.appendChild(this._canvas);
+            this.domNode.appendChild(this._image);
+            this.domNode.appendChild(this._reset);
 
-            _updateObject: function(obj, callback) {
-                this._mxObject = obj;
+            domStyle.set(this.domNode, sizeProperties);
 
+            this._context = this._canvas.getContext("2d");
+        },
+
+        _updateObject: function(obj, callback) {
+            this._mxObject = obj;
+
+            this._resetCanvas();
+
+            if (this._attribute && obj && obj.get(this._attribute)) {
+                this._showImage();
+            } else {
+                this._hideImage();
+            }
+
+            this.set("disabled", obj ? false : true);
+
+            mendix.lang.nullExec(callback);
+        },
+
+        _showImage: function() {
+            this._image.src = this._mxObject.get(this.dataUrl);
+
+            dojo.replaceClass(this.domNode, "signature_set", "signature_unset");
+        },
+
+        _hideImage: function() {
+            this._image.src = "";
+
+            domClass.replace(this.domNode, "signature_unset", "signature_set");
+        },
+
+        _drawGrid: function() {
+            if (!this.showgrid) return;
+
+            var x = this.gridx,
+                y = this.gridy,
+                context = this._context,
+                width   = this._canvas.width,
+                height  = this._canvas.height;
+
+            context.beginPath();
+
+            for (; x < width; x += this.gridx) {
+                context.moveTo(x, 0);
+                context.lineTo(x, this._canvas.height);
+            }
+
+            for (; y < height; y += this.gridy) {
+                context.moveTo(0, y);
+                context.lineTo(this._canvas.width, y);
+            }
+
+            context.lineWidth = 1;
+            context.strokeStyle = this.gridcolor;
+            context.stroke();
+        },
+
+        _setupEvents: function() {
+            on(this._canvas, dojoTouch.press, lang.hitch(this, this._beginCurve));
+            on(this._reset, "click", lang.hitch(this, this._eventResetClicked));
+
+            // This prevents the "dragging image" annoyance when someone tries to
+            // draw on the image.
+            on(this._image, dojoTouch.press, function(e) {
+                domEvent.stop(e);
+                return false;
+            });
+        },
+
+        _getCoords: function(e) {
+            var pos   = dojo.position(this._canvas, true),
+                pageX = e.targetTouches ? e.targetTouches[0].pageX : e.pageX,
+                pageY = e.targetTouches ? e.targetTouches[0].pageY : e.pageY,
+                x     = Math.floor(pageX - pos.x),
+                y     = Math.floor(pageY - pos.y);
+
+            return { x: x, y: y };
+        },
+
+        _beginCurve: function(e) {
+            domEvent.stop(e);
+
+            if (this.get("disabled")) return;
+
+            this._bezierBuf = [];
+
+            this._stopTimeout();
+
+            this._context.strokeStyle = this.pencolor;
+            this._context.lineJoin    = "round";
+            this._context.lineWidth   = this.pensize;
+
+            this._context.beginPath();
+
+            this._handlers = [
+                on(window, dojoTouch.move, lang.hitch(this, this._updateCurve)),
+                on(window, dojoTouch.release, lang.hitch(this, this._endCurve))
+            ];
+        },
+
+        _updateCurve: function(e) {
+            domEvent.stop(e);
+
+            this._stopTimeout();
+
+            if (this._movedTo) {
+                this._bezierBuf.push(this._getCoords(e));
+
+                if (this._bezierBuf.length === 4) {
+                    var point = this._bezierPoint.apply(this, this._bezierBuf);
+
+                    this._context.lineTo(point.x, point.y);
+                    this._context.stroke();
+
+                    this._bezierBuf.shift();
+                    this._bezierBuf[0] = point;
+                }
+            } else {
+                this._context.moveTo(this._getCoords(e).x, this._getCoords(e).y);
+                this._movedTo = true;
+            }
+        },
+
+        _endCurve: function(e) {
+            domEvent.stop(e);
+
+            this._stopTimeout();
+
+            // Finish last points in Bezier buffer
+            dojoArray.forEach(this._bezierBuf, function(position) {
+                this._context.lineTo(position.x, position.y);
+            }, this);
+
+            this._context.stroke();
+
+            dojoArray.forEach(this._handlers, function(handler) {
+                handler.remove();
+            });
+
+            this._timer = setTimeout(dojo.hitch(this, this._finalizeSignature), this.timeout);
+        },
+
+        _eventResetClicked: function(e) {
+            if (!this.get("disabled")) {
+                this._resetMxObject();
                 this._resetCanvas();
 
-                if (this._attribute && obj && obj.get(this._attribute)) {
-                    this._showImage();
-                } else {
-                    this._hideImage();
-                }
-
-                this.set('disabled', obj ? false : true);
-
-                mendix.lang.nullExec(callback);
-            },
-
-            _showImage: function() {
-                this._image.src = this._mxObject.get(this.dataUrl);
-
-                dojo.replaceClass(this.domNode, 'signature_set', 'signature_unset');
-            },
-
-            _hideImage: function() {
-                this._image.src = '';
-
-                domClass.replace(this.domNode, 'signature_unset', 'signature_set');
-            },
-
-            _drawGrid: function() {
-                if (!this.showgrid) return;
-
-                var x = this.gridx,
-                    y = this.gridy,
-                    context = this._context,
-                    width   = this._canvas.width,
-                    height  = this._canvas.height;
-
-                context.beginPath();
-
-                for (; x < width; x += this.gridx) {
-                    context.moveTo(x, 0);
-                    context.lineTo(x, this._canvas.height);
-                }
-
-                for (; y < height; y += this.gridy) {
-                    context.moveTo(0, y);
-                    context.lineTo(this._canvas.width, y);
-                }
-
-                context.lineWidth = 1;
-                context.strokeStyle = this.gridcolor;
-                context.stroke();
-            },
-
-            _setupEvents: function() {
-                this.connect(this._canvas, (this._touchSupport ? 'touchstart' : 'mousedown'), '_eventMouseDown');
-                this.connect(this._reset, 'click', dojo.hitch(this, this._eventResetClicked));
-
-                // This prevents the 'dragging image' annoyance when someone tries to
-                // draw on the image.
-                this.connect(
-                    this._image,
-                    this._touchSupport ? 'touchstart' : 'mousedown',
-                    function(e) {
-                        dojo.stopEvent(e);
-                        return false;
-                    }
-                );
-            },
-
-            _getCoords: function(e) {
-                var pos   = dojo.position(this._canvas, true),
-                    pageX = e.targetTouches ? e.targetTouches[0].pageX : e.pageX,
-                    pageY = e.targetTouches ? e.targetTouches[0].pageY : e.pageY,
-                    x     = Math.floor(pageX - pos.x),
-                    y     = Math.floor(pageY - pos.y);
-
-                return { x: x, y: y };
-            },
-
-            _beginCurve: function(e) {
-                this._bezierBuf = [];
-                this._handlers = [];
-
-                this._stopTimeout();
-
-                this._context.strokeStyle = this.pencolor;
-                this._context.lineJoin    = 'round';
-                this._context.lineWidth   = this.pensize;
-
-                this._context.beginPath();
-
-                this._handlers.push(this.connect(window, this._touchSupport ? 'touchmove' : 'mousemove', dojo.hitch(this, this._eventMouseMove)));
-                this._handlers.push(this.connect(window, this._touchSupport ? 'touchend' : 'mouseup', dojo.hitch(this, this._eventMouseUp)));
-            },
-
-            _updateCurve: function(e) {
-                console.log(this.id + '.updateCurve');
-
-                var context = this._context,
-                    buf = this._bezierBuf,
-                    pos = this._getCoords(e),
-                    bp = null;
-
-                this._stopTimeout();
-
-                if (this._movedTo) {
-                    buf.push(pos);
-
-                    if (buf.length === 4) {
-                        bp = this._bezierPoint.apply(this, buf);
-
-                        context.lineTo(bp.x, bp.y);
-                        context.stroke();
-
-                        buf.shift();
-                        buf[0] = bp;
-                    }
-                } else {
-                    context.moveTo(pos.x, pos.y);
-                    this._movedTo = true;
-                }
-            },
-
-            _endCurve: function() {
-                var buf = this._bezierBuf,
-                    i = 0,
-                    pos = null,
-                    j = 0,
-                    handlers = null;
-
-                this._stopTimeout();
-
-                // Finish last points in Bezier buffer
-                while(buf[i]) {
-                    pos = buf[i];
-                    this._context.lineTo(pos.x, pos.y);
-                    i++;
-                }
-                this._context.stroke();
-
-                this._bezierBuf = null;
-
-                while(this._handlers[j]){
-                    handlers = this._handlers[j];
-                    this.disconnect(handlers);
-                    j++;
-                }
-
-                this._timer = setTimeout(dojo.hitch(this, this._finalizeSignature), this.timeout);
-            },
-
-            _eventMouseDown: function(e) {
-                console.log(this.id + '._eventMouseDown');
-
-                dojo.stopEvent(e);
-
-                if (!this.get('disabled')) {
-                    this._beginCurve(e);
-                }
-            },
-
-            _eventMouseMove: function(e) {
-                console.log(this.id + '._eventMouseMove');
-
-                dojo.stopEvent(e);
-
-                this._updateCurve(e);
-            },
-
-            _eventMouseUp: function(e) {
-                console.log(this.id + '._eventMouseUp');
-
-                dojo.stopEvent(e);
-
-                this._endCurve();
-            },
-
-            _eventResetClicked: function(e) {
-                console.log(this.id + '._eventResetClicked');
-
-                if (!this.get('disabled')) {
-                    this._resetMxObject();
-                    this._resetCanvas();
-
-                    this._hideImage();
-                }
-            },
-
-            _resetCanvas: function() {
-                console.log(this.id + '.resetCanvas');
-
-                this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
-
-                this._bezierBuf = [];
-
-                this._drawGrid();
-            },
-
-            _resetMxObject: function() {
-                console.log(this.id + '.resetMxObject');
-
-                this._mxObject.set(this.dataUrl, '');
-            },
-
-            _stopTimeout: function() {
-                console.log(this.id + '._stopTimeout');
-
-                if (this._timer) {
-                    clearTimeout(this._timer);
-                }
-            },
-
-            _finalizeSignature: function() {
-                console.log(this.id + '.finalizeSignature');
-
-                var mxobj = this._mxObject;
-                if (mxobj) {
-                    if (mxobj.has(this.dataUrl)) {
-                        mxobj.set(this.dataUrl, this._canvas.toDataURL());
-                    } else {
-                        logger.error(this.id + '.finalizeSignature: no dataUrl attribute found.');
-                    }
-                }
-
-                this._showImage();
-            },
-
-            _bezierPoint: function(c1, c2, c3, c4) {
-                return {
-                    x: c1.x * this._bezier1 + c2.x * this._bezier2 +
-                        c3.x * this._bezier3 + c4.x * this._bezier4,
-                    y: c1.y * this._bezier1 + c2.y * this._bezier2 +
-                        c3.y * this._bezier3 + c4.y * this._bezier4
-                };
-            },
-
-            _setDisabledAttr: function(value) {
-                var argumentsCopy = [];
-
-                if (typeof this._attribute === 'undefined' || this._attribute === null) {
-                    this._attribute = '';
-                }
-                if (this.readonly || !this._mxObject || this._mxObject.isReadonlyAttr(this._attribute)) {
-                    value = true; 
-                }
-
-                return this.inherited(arguments, [ value ]);
+                this._hideImage();
             }
-        });
+        },
+
+        _resetCanvas: function() {
+            this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
+
+            this._bezierBuf = [];
+
+            this._drawGrid();
+        },
+
+        _resetMxObject: function() {
+            this._mxObject.set(this.dataUrl, "");
+        },
+
+        _stopTimeout: function() {
+            if (this._timer) {
+                clearTimeout(this._timer);
+            }
+        },
+
+        _finalizeSignature: function() {
+            if (this._mxObject) {
+                if (this._mxObject.has(this.dataUrl)) {
+                    this._mxObject.set(this.dataUrl, this._canvas.toDataURL());
+                } else {
+                    logger.error(this.id + ".finalizeSignature: no dataUrl attribute found.");
+                }
+            }
+
+            this._showImage();
+        },
+
+        _bezierPoint: function(c1, c2, c3, c4) {
+            return {
+                x: c1.x * this._bezier1 + c2.x * this._bezier2 +
+                    c3.x * this._bezier3 + c4.x * this._bezier4,
+                y: c1.y * this._bezier1 + c2.y * this._bezier2 +
+                    c3.y * this._bezier3 + c4.y * this._bezier4
+            };
+        },
+
+        _setDisabledAttr: function(value) {
+            var isDisabled = this.readonly ||
+                !this._mxObject ||
+                !this._attribute ||
+                this._mxObject.isReadonlyAttr(this._attribute) ||
+                value;
+            return this.inherited(arguments, [ isDisabled ]);
+        }
     });
-}());
+});

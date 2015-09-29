@@ -14,6 +14,7 @@
 
 .signature_unset canvas {
     display: block;
+    touch-action: none;
 }
 
 .signature_unset img {
