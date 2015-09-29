@@ -222,27 +222,22 @@ require([
         _updateCurve: function(e) {
             domEvent.stop(e);
 
-            var context = this._context,
-                buf = this._bezierBuf,
-                pos = this._getCoords(e),
-                bp = null;
-
             this._stopTimeout();
 
             if (this._movedTo) {
-                buf.push(pos);
+                this._bezierBuf.push(this._getCoords(e));
 
-                if (buf.length === 4) {
-                    bp = this._bezierPoint.apply(this, buf);
+                if (this._bezierBuf.length === 4) {
+                    var point = this._bezierPoint.apply(this, this._bezierBuf);
 
-                    context.lineTo(bp.x, bp.y);
-                    context.stroke();
+                    this._context.lineTo(point.x, point.y);
+                    this._context.stroke();
 
-                    buf.shift();
-                    buf[0] = bp;
+                    this._bezierBuf.shift();
+                    this._bezierBuf[0] = point;
                 }
             } else {
-                context.moveTo(pos.x, pos.y);
+                this._context.moveTo(this._getCoords(e).x, this._getCoords(e).y);
                 this._movedTo = true;
             }
         },
@@ -294,10 +289,9 @@ require([
         },
 
         _finalizeSignature: function() {
-            var mxobj = this._mxObject;
-            if (mxobj) {
-                if (mxobj.has(this.dataUrl)) {
-                    mxobj.set(this.dataUrl, this._canvas.toDataURL());
+            if (this._mxObject) {
+                if (this._mxObject.has(this.dataUrl)) {
+                    this._mxObject.set(this.dataUrl, this._canvas.toDataURL());
                 } else {
                     logger.error(this.id + ".finalizeSignature: no dataUrl attribute found.");
                 }
