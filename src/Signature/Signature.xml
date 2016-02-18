@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<widget id="Signature.widget.Signature" 
-        needsEntityContext="true" 
+<widget id="Signature.widget.Signature"
+        needsEntityContext="true"
         mobile="true"
         xmlns="http://www.mendix.com/widget/1.0/">
     <name>Signature</name>
@@ -81,13 +81,24 @@
             <category>Customization</category>
             <description>Grid color</description>
         </property>
+
         <property key="gridborder" type="integer" defaultValue="2">
             <caption>Grid border width</caption>
             <category>Customization</category>
             <description>Border width(px)</description>
         </property>
 
+        <property key="responsive" type="boolean" defaultValue="false">
+            <caption>Responsive</caption>
+            <category>Customization</category>
+            <description>Make the signature pad responsive. Set the ratio accordingly</description>
+        </property>
+
+        <property key="responsiveRatio" type="string" defaultValue="1.5">
+            <caption>Responsive ratio</caption>
+            <category>Customization</category>
+            <description>This is the width/height ratio for the widget when setting responsive. Ratio is calculated as: heigh = width / responsiveRatio</description>
+        </property>
+
     </properties>
 </widget>
-
-

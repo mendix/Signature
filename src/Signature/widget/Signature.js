@@ -1,11 +1,3 @@
-/*jslint white: true nomen: true plusplus: true */
-/*global mx, mxui, window, document, mendix, dojo, require, console, define, module, logger */
-/**
-	Signature
-	========================
-	@copyright : Mendix bv
-	@license   : Apache License, Version 2.0, January 2004
-*/
 require([
     "mxui/widget/_WidgetBase",
     "dijit/_TemplatedMixin",
@@ -15,13 +7,19 @@ require([
     "dojo/_base/event",
     "dojo/dom-class",
     "dojo/dom-style",
+    "dojo/dom-geometry",
     "dojo/touch",
     "dojo/on",
     "dojo/_base/lang",
-    "dojo/_base/declare"
-], function(_WidgetBase, _Templated, dom, domConstruct, dojoArray, domEvent, domClass, domStyle, dojoTouch, on, lang, declare) {
+    "dojo/_base/declare",
+    "dojo/text!Signature/widget/templates/Signature.html"
+], function(_WidgetBase, _Templated, dom, domConstruct, dojoArray, domEvent, domClass, domStyle, domGeom, dojoTouch, on, lang, declare, widgetTemplate) {
 
     return declare("Signature.widget.Signature", [ _WidgetBase, _Templated ], {
+
+        templateString: widgetTemplate,
+
+        _uiCreated: false,
         _smoothingpct: 0.9,
 
         _mxObject: null,
@@ -36,16 +34,14 @@ require([
         _bezierBuf: null,
         _handlers: null,
 
-        templatePath: require.toUrl("Signature/widget/templates/Signature.html"),
-
         postCreate: function() {
+            //logger.level(logger.DEBUG);
+            logger.debug(this.id + ".postCreate");
             this._setupWidget();
-            this._createUI();
-            this._setupEvents();
         },
 
         startup: function() {
-            this.set("disabled", this.readonly);
+            logger.debug(this.id + ".startup");
 
             var path = this.dataUrl.split("/");
             this._attribute = path[path.length - 1];
@@ -53,6 +49,20 @@ require([
         },
 
         update: function(obj, callback) {
+            logger.debug(this.id + ".update");
+
+            if (!this._uiCreated) {
+                this._createUI(lang.hitch(this, function () {
+                    this.callUpdate(obj, callback);
+                }));
+            } else {
+                this.callUpdate(obj, callback);
+            }
+        },
+
+        callUpdate: function (obj, callback) {
+            logger.debug(this.id + ".callUpdate");
+            this.set("disabled", this.readonly);
             if (obj) {
                 obj.fetch(this._path, dojo.hitch(this, function(obj) {
                     this._updateObject(obj, callback);
@@ -63,16 +73,19 @@ require([
         },
 
         enable: function() {
+            logger.debug(this.id + ".enable");
             dojo.attr(this._reset, "disabled", false);
             dojo.removeClass(this.domNode, "signhereSignature_disabled");
         },
 
         disable: function() {
+            logger.debug(this.id + ".disable");
             dojo.attr(this._reset, "disabled", true);
             dojo.addClass(this.domNode, "signhereSignature_disabled");
         },
 
         _setupWidget: function() {
+            logger.debug(this.id + "._setupWidget");
             var t = this._smoothingpct,
                 u = 1 - t;
 
@@ -84,7 +97,47 @@ require([
             this._bezierBuf = [];
         },
 
-        _createUI: function() {
+        _resize: function () {
+            logger.debug(this.id + "._resize");
+            if (this.responsive) {
+                var position = domGeom.getContentBox(this.domNode.parentElement),
+                    ratio = parseFloat(this.responsiveRatio);
+
+                if (isNaN(ratio)) {
+                    ratio = 1.5;
+                }
+
+                if (position.w > 0 && this.responsive) {
+                    this.domNode.width = position.w;
+                } else {
+                    this.domNode.width = this.width;
+                }
+
+                if (position.h > 0 && this.responsive) {
+                    var width = this.domNode.width,
+                        height = Math.floor(width / ratio);
+
+                    if (position.h < height) {
+                        this.domNode.height = position.h;
+                    } else {
+                        this.domNode.height = height;
+                    }
+                } else {
+                    this.domNode.height = this.height;
+                }
+
+                this._canvas.height = this.domNode.height;
+                this._canvas.width = this.domNode.width - 4;
+                this._image.height = this.domNode.height;
+                this._image.width = this.domNode.width;
+                this._reset.width = this.domNode.width;
+
+                this._resetCanvas();
+            }
+        },
+
+        _createUI: function(callback) {
+            logger.debug(this.id + "._createUI");
             var $ = domConstruct.create,
                 sizeProperties = {
                     "width": this.width + "px",
@@ -100,7 +153,7 @@ require([
             this._reset = $("button", {
                 "class": "btn",
                 "style": {
-                    "width": (this.width + 4) + "px"
+                    "width": this.responsive ? "100%" : (this.width + 4) + "px"
                 },
                 "innerHTML":  this.resetcaption
             });
@@ -109,12 +162,21 @@ require([
             this.domNode.appendChild(this._image);
             this.domNode.appendChild(this._reset);
 
-            domStyle.set(this.domNode, sizeProperties);
+            //domStyle.set(this.domNode, sizeProperties);
 
             this._context = this._canvas.getContext("2d");
+
+            this._resize();
+            this._setupEvents();
+
+            this._uiCreated = true;
+            if (typeof callback === "function") {
+                callback();
+            }
         },
 
         _updateObject: function(obj, callback) {
+            logger.debug(this.id + "._updateObject");
             this._mxObject = obj;
 
             this._resetCanvas();
@@ -131,18 +193,21 @@ require([
         },
 
         _showImage: function() {
+            logger.debug(this.id + "._showImage");
             this._image.src = this._mxObject.get(this.dataUrl);
 
             dojo.replaceClass(this.domNode, "signature_set", "signature_unset");
         },
 
         _hideImage: function() {
+            logger.debug(this.id + "._hideImage");
             this._image.src = "";
 
             domClass.replace(this.domNode, "signature_unset", "signature_set");
         },
 
         _drawGrid: function() {
+            logger.debug(this.id + "._drawGrid");
             if (!this.showgrid) return;
 
             var x = this.gridx,
@@ -169,8 +234,13 @@ require([
         },
 
         _setupEvents: function() {
+            logger.debug(this.id + "._setupEvents");
             on(this._canvas, dojoTouch.press, lang.hitch(this, this._beginCurve));
             on(this._reset, "click", lang.hitch(this, this._eventResetClicked));
+
+            if (this.responsive) {
+                this.connect(this.mxform, "resize", lang.hitch(this, this._resize));
+            }
 
             // This prevents the "dragging image" annoyance when someone tries to
             // draw on the image.
@@ -254,6 +324,7 @@ require([
         },
 
         _eventResetClicked: function(e) {
+            logger.debug(this.id + "._eventResetClicked");
             if (!this.get("disabled")) {
                 this._resetMxObject();
                 this._resetCanvas();
@@ -263,6 +334,7 @@ require([
         },
 
         _resetCanvas: function() {
+            logger.debug(this.id + "._resetCanvas");
             this._context.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
             this._bezierBuf = [];
@@ -271,6 +343,7 @@ require([
         },
 
         _resetMxObject: function() {
+            logger.debug(this.id + "._resetMxObject");
             this._mxObject.set(this.dataUrl, "");
         },
 
@@ -281,6 +354,7 @@ require([
         },
 
         _finalizeSignature: function() {
+            logger.debug(this.id + "._finalizeSignature");
             if (this._mxObject) {
                 if (this._mxObject.has(this.dataUrl)) {
                     this._mxObject.set(this.dataUrl, this._canvas.toDataURL());
@@ -302,6 +376,7 @@ require([
         },
 
         _setDisabledAttr: function(value) {
+            logger.debug(this.id + "._setDisabledAttr");
             var isDisabled = this.readonly ||
                 !this._mxObject ||
                 !this._attribute ||
