@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <widget id="Signature.widget.Signature"
+        offlineCapable="true"
         needsEntityContext="true"
         mobile="true"
         xmlns="http://www.mendix.com/widget/1.0/">
