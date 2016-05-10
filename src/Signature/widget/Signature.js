@@ -5,6 +5,7 @@ require([
     "dojo/dom-construct",
     "dojo/_base/array",
     "dojo/_base/event",
+    "dojo/_base/html",
     "dojo/dom-class",
     "dojo/dom-style",
     "dojo/dom-geometry",
@@ -13,7 +14,7 @@ require([
     "dojo/_base/lang",
     "dojo/_base/declare",
     "dojo/text!Signature/widget/templates/Signature.html"
-], function(_WidgetBase, _Templated, dom, domConstruct, dojoArray, domEvent, domClass, domStyle, domGeom, dojoTouch, on, lang, declare, widgetTemplate) {
+], function(_WidgetBase, _Templated, dom, domConstruct, dojoArray, domEvent, dojoHtml, domClass, domStyle, domGeom, dojoTouch, on, lang, declare, widgetTemplate) {
 
     return declare("Signature.widget.Signature", [ _WidgetBase, _Templated ], {
 
@@ -35,7 +36,6 @@ require([
         _handlers: null,
 
         postCreate: function() {
-            //logger.level(logger.DEBUG);
             logger.debug(this.id + ".postCreate");
             this._setupWidget();
         },
@@ -64,7 +64,9 @@ require([
             logger.debug(this.id + ".callUpdate");
             this.set("disabled", this.readonly);
             if (obj) {
+
                 obj.fetch(this._path, dojo.hitch(this, function(obj) {
+                    this._resetSubscriptions(obj);
                     this._updateObject(obj, callback);
                 }));
             } else {
@@ -340,6 +342,8 @@ require([
             this._bezierBuf = [];
 
             this._drawGrid();
+
+            this._clearValidations();
         },
 
         _resetMxObject: function() {
@@ -383,6 +387,76 @@ require([
                 this._mxObject.isReadonlyAttr(this._attribute) ||
                 value;
             return this.inherited(arguments, [ isDisabled ]);
+        },
+
+        _unsubscribe: function () {
+          if (this._handles) {
+              dojoArray.forEach(this._handles, function (handle) {
+                  mx.data.unsubscribe(handle);
+              });
+              this._handles = [];
+          }
+        },
+
+        // Reset subscriptions.
+        _resetSubscriptions: function(obj) {
+            logger.debug(this.id + "._resetSubscriptions");
+            // Release handles on previous object, if any.
+            this._unsubscribe();
+
+            // When a mendix object exists create subscribtions.
+            if (obj) {
+                var validationHandle = mx.data.subscribe({
+                    guid: obj.getGuid(),
+                    val: true,
+                    callback: lang.hitch(this, this._handleValidation)
+                });
+
+                this._handles = [ validationHandle ];
+            }
+        },
+
+        // Handle validations.
+        _handleValidation: function(validations) {
+            logger.debug(this.id + "._handleValidation");
+            this._clearValidations();
+
+            var validation = validations[0],
+                message = validation.getReasonByAttribute(this.dataUrl);
+
+            if (this._readOnly) {
+                validation.removeAttribute(this.dataUrl);
+            } else if (message) {
+                this._addValidation(message);
+                validation.removeAttribute(this.dataUrl);
+            }
+        },
+
+        // Clear validations.
+        _clearValidations: function() {
+            logger.debug(this.id + "._clearValidations");
+            domConstruct.destroy(this._alertDiv);
+            this._alertDiv = null;
+        },
+
+        // Show an error message.
+        _showError: function(message) {
+            logger.debug(this.id + "._showError");
+            if (this._alertDiv !== null) {
+                dojoHtml.set(this._alertDiv, message);
+                return true;
+            }
+            this._alertDiv = domConstruct.create("div", {
+                "class": "alert alert-danger",
+                "innerHTML": message
+            });
+            domConstruct.place(this._alertDiv, this.domNode);
+        },
+
+        // Add a validation.
+        _addValidation: function(message) {
+            logger.debug(this.id + "._addValidation");
+            this._showError(message);
         }
     });
 });
