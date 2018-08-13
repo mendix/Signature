@@ -101,5 +101,18 @@
             <description>This is the width/height ratio for the widget when setting responsive. Ratio is calculated as: heigh = width / responsiveRatio</description>
         </property>
 
+        <property key="onChangeNf" type="nanoflow" required="false">
+            <caption>On Change nanoflow</caption>
+            <category>Behaviour</category>
+            <description>Called after the signature is set.</description>
+             <returnType type="Void"/>
+        </property>
+        <property key="onChangeMf" type="microflow" required="false">
+            <caption>On Change microflow</caption>
+            <category>Behaviour</category>
+            <description>Called after the signature is set.</description>
+             <returnType type="Void"/>
+        </property>
+
     </properties>
 </widget>

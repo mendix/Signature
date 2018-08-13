@@ -362,6 +362,11 @@ require([
             if (this._mxObject) {
                 if (this._mxObject.has(this.dataUrl)) {
                     this._mxObject.set(this.dataUrl, this._canvas.toDataURL());
+                    if(this.onChangeNf){
+                        this._execNf(this.onChangeNf);
+                    }else if(this.onChangeMF){
+                        this._execMf(this.onChangeMf);
+                    }
                 } else {
                     logger.error(this.id + ".finalizeSignature: no dataUrl attribute found.");
                 }
@@ -457,6 +462,45 @@ require([
         _addValidation: function(message) {
             logger.debug(this.id + "._addValidation");
             this._showError(message);
-        }
+        },
+
+        _execMf: function (mf) {
+            if (mf) {
+                mx.data.action({
+                    params: {
+                        actionname: mf
+                    },
+                    store: {
+                        caller: this.mxform
+                    },
+                    callback: lang.hitch(this, function () {
+                        //ok
+                    }),
+                    error: function (error) {
+                        console.error(error.description);
+                    }
+                }, this);
+            }
+        },
+
+        _execNf: function (nf) {
+            if (nf) {
+                mx.data.callNanoflow({
+                    nanoflow: nf,
+                    orgin: this.mxform,
+                    context:this.mxcontext,
+                    callback: lang.hitch(this, function () {
+                        //ok
+                    }),
+                    error: function (error) {
+                        console.error(error.description);
+                    }
+                });
+            }
+        },
+
+
+
+
     });
 });
